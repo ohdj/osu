@@ -141,7 +141,7 @@ namespace osu.Game.Overlays.Profile.Sections
             {
                 missing.Hide();
 
-                moreButton.FadeTo(items.Count == CurrentPage?.Limit ? 1 : 0);
+                moreButton.FadeTo(items.Count == CurrentPage?.Limit && items.Count != header.Current.Value ? 1 : 0);
                 moreButton.IsLoading = false;
 
                 ItemsContainer.AddRange(drawables);

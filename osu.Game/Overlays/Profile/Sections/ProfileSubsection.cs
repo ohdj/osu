@@ -16,7 +16,7 @@ namespace osu.Game.Overlays.Profile.Sections
         private readonly LocalisableString headerText;
         private readonly CounterVisibilityState counterVisibilityState;
 
-        private ProfileSubsectionHeader header = null!;
+        protected ProfileSubsectionHeader header = null!;
 
         protected ProfileSubsection(Bindable<UserProfileData?> user, LocalisableString? headerText = null, CounterVisibilityState counterVisibilityState = CounterVisibilityState.AlwaysHidden)
         {
