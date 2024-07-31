@@ -193,7 +193,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
         private void addPart(Vector2 screenSpacePosition)
         {
-            parts[currentIndex].Position = screenSpacePosition;
+            parts[currentIndex].Position = ToLocalSpace(screenSpacePosition);
             parts[currentIndex].Time = time + 1;
             ++parts[currentIndex].InvalidationID;
 
@@ -220,7 +220,6 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
             private float fadeExponent;
 
             private readonly TrailPart[] parts = new TrailPart[max_sprites];
-            private Vector2 size;
             private Vector2 originPosition;
 
             private IVertexBatch<TexturedTrailVertex> vertexBatch;
@@ -236,7 +235,6 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                 shader = Source.shader;
                 texture = Source.texture;
-                size = Source.partSize;
                 time = Source.time;
                 fadeExponent = Source.FadeExponent;
 
@@ -277,6 +275,8 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                 RectangleF textureRect = texture.GetTextureRect();
 
+                renderer.PushLocalMatrix(DrawInfo.Matrix);
+
                 foreach (var part in parts)
                 {
                     if (part.InvalidationID == -1)
@@ -287,7 +287,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                     vertexBatch.Add(new TexturedTrailVertex
                     {
-                        Position = new Vector2(part.Position.X - size.X * originPosition.X, part.Position.Y + size.Y * (1 - originPosition.Y)),
+                        Position = new Vector2(part.Position.X - texture.DisplayWidth * originPosition.X, part.Position.Y + texture.DisplayHeight * (1 - originPosition.Y)),
                         TexturePosition = textureRect.BottomLeft,
                         TextureRect = new Vector4(0, 0, 1, 1),
                         Colour = DrawColourInfo.Colour.BottomLeft.Linear,
@@ -296,7 +296,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                     vertexBatch.Add(new TexturedTrailVertex
                     {
-                        Position = new Vector2(part.Position.X + size.X * (1 - originPosition.X), part.Position.Y + size.Y * (1 - originPosition.Y)),
+                        Position = new Vector2(part.Position.X + texture.DisplayWidth * (1 - originPosition.X), part.Position.Y + texture.DisplayHeight * (1 - originPosition.Y)),
                         TexturePosition = textureRect.BottomRight,
                         TextureRect = new Vector4(0, 0, 1, 1),
                         Colour = DrawColourInfo.Colour.BottomRight.Linear,
@@ -305,7 +305,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                     vertexBatch.Add(new TexturedTrailVertex
                     {
-                        Position = new Vector2(part.Position.X + size.X * (1 - originPosition.X), part.Position.Y - size.Y * originPosition.Y),
+                        Position = new Vector2(part.Position.X + texture.DisplayWidth * (1 - originPosition.X), part.Position.Y - texture.DisplayHeight * originPosition.Y),
                         TexturePosition = textureRect.TopRight,
                         TextureRect = new Vector4(0, 0, 1, 1),
                         Colour = DrawColourInfo.Colour.TopRight.Linear,
@@ -314,13 +314,15 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                     vertexBatch.Add(new TexturedTrailVertex
                     {
-                        Position = new Vector2(part.Position.X - size.X * originPosition.X, part.Position.Y - size.Y * originPosition.Y),
+                        Position = new Vector2(part.Position.X - texture.DisplayWidth * originPosition.X, part.Position.Y - texture.DisplayHeight * originPosition.Y),
                         TexturePosition = textureRect.TopLeft,
                         TextureRect = new Vector4(0, 0, 1, 1),
                         Colour = DrawColourInfo.Colour.TopLeft.Linear,
                         Time = part.Time
                     });
                 }
+
+                renderer.PopLocalMatrix();
 
                 vertexBatch.Draw();
                 shader.Unbind();
